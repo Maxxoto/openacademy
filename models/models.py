@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from datetime import timedelta
 from odoo import models, fields, api, exceptions
 
 
@@ -54,6 +55,9 @@ class Session(models.Model):
 
     taken_seats = fields.Float(string="Taken seats", compute="_taken_seats")
 
+    end_date = fields.Date(string="End Date", store=True,
+                           compute="_get_end_date", inverse="_set_end_date")
+
     @api.depends('seats', 'attendee_ids')
     def _taken_seats(self):
         for r in self:
@@ -79,6 +83,24 @@ class Session(models.Model):
                     'message': "Increase seats or remove excess attendees"
                 }
             }
+
+    @api.depends('start_date', 'duration')
+    def _get_end_date(self):
+        for r in self:
+            if not (r.start_date and r.duration):
+                r.end_date = r.start_date
+                continue
+
+            # Add duration Monday - Saturday (-1 to get friday , 23.59 not 24.00(Saturday))
+            duration = timedelta(days=r.duration, seconds=-1)
+            r.end_date = r.start_date + duration
+
+    def _set_end_date(self):
+        for r in self:
+            if not (r.start_date and r.end_date):
+                continue
+
+            r.duration = (r.end_date - r.start_date).days + 1
 
     # Contraint is for checking condition just like SQL Constraint
     @api.constrains('instructor_id', 'attendee_ids')
