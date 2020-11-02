@@ -123,7 +123,6 @@
     </record>
 
     <!-- SESSION CALENDAR VIEW -->
-
     <record model="ir.ui.view" id="session_calendar_view">
         <field name="name">session.calendar</field>
         <field name="model">openacademy.session</field>
@@ -133,6 +132,7 @@
             </calendar>
         </field>
     </record>
+    <!-- END -->
 
     <!-- SESSION GRAPH VIEW -->
     <record model="ir.ui.view" id="session_graph_view">
@@ -145,12 +145,24 @@
             </graph>
         </field>
     </record>
+    <!-- END -->
+
+    <!-- GANTT CHART -->
+    <record model="ir.ui.view" id="session_gantt_view">
+        <field name="name">session.gant</field>
+        <field name="model">openacademy.session</field>
+        <field name="arch" type="xml">
+            <gantt string="Session Gantt" date_start="start_date" date_stop="end_date" default_group_by="instructor_id"/>
+        </field>
+    </record>
+    <!-- END -->
+
     <!-- ACTIONS -->
 
     <record model="ir.actions.act_window" id="session_list_action">
         <field name="name">Sessions</field>
         <field name="res_model">openacademy.session</field>
-        <field name="view_mode">tree,form,calendar,graph</field>
+        <field name="view_mode">tree,form,calendar,gantt,graph</field>
     </record>
 
 
