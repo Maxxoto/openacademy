@@ -44,12 +44,12 @@ class Session(models.Model):
     name = fields.Char(required=True)
     start_date = fields.Date(default=fields.Date.today)
     duration = fields.Float(digits=(6, 2), help="Duration in days")
-    seats = fields.Integer(string="Number of seats")
     active = fields.Boolean(default=True)
 
     instructor_id = fields.Many2one('res.partner', string="Instructor", domain=[
                                     ('instructor', '=', True), ('category_id.name', 'ilike', 'Teacher')])
     course_id = fields.Many2one(
+        seats=fields.Integer(string="Number of seats")
         'openacademy.course', ondelete="cascade", string="Course", required=True)
     attendee_ids = fields.Many2many('res.partner', string="Attendees")
 
@@ -57,6 +57,9 @@ class Session(models.Model):
 
     end_date = fields.Date(string="End Date", store=True,
                            compute="_get_end_date", inverse="_set_end_date")
+
+    attendees_count = fields.Integer(
+        string="Attendeesc count", compute="_get_attendees_count", store=True)
 
     @api.depends('seats', 'attendee_ids')
     def _taken_seats(self):
@@ -101,6 +104,11 @@ class Session(models.Model):
                 continue
 
             r.duration = (r.end_date - r.start_date).days + 1
+
+    @api.depends('attendee_ids')
+    def _get_attendees_count(self):
+        for r in self:
+            r.attendees_count = len(r.attendee_ids)
 
     # Contraint is for checking condition just like SQL Constraint
     @api.constrains('instructor_id', 'attendee_ids')
